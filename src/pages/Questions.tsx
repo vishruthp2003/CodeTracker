@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Pencil, Trash2, Plus, Search, Code } from "lucide-react";
+import { Pencil, Trash2, Plus, Search, Code, Edit } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -218,7 +218,11 @@ const Questions = () => {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {filteredQuestions.map((question) => (
-            <Card key={question.id} className="flex flex-col hover:border-primary/50 transition-colors">
+            <Card 
+              key={question.id} 
+              className="flex flex-col hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 cursor-pointer group"
+              onClick={() => navigate(`/questions/${question.id}`)}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <Badge className={getDifficultyColor(question.difficulty)}>
@@ -228,7 +232,7 @@ const Questions = () => {
                     {question.status}
                   </Badge>
                 </div>
-                <CardTitle className="line-clamp-2">{question.title}</CardTitle>
+                <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">{question.title}</CardTitle>
                 <CardDescription className="line-clamp-3">{question.description}</CardDescription>
               </CardHeader>
               <CardContent className="flex-1">
@@ -248,15 +252,21 @@ const Questions = () => {
                   variant="outline"
                   size="sm"
                   className="flex-1"
-                  onClick={() => navigate(`/questions/edit/${question.id}`)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/questions/edit/${question.id}`);
+                  }}
                 >
-                  <Pencil className="w-4 h-4 mr-2" />
+                  <Edit className="w-4 h-4 mr-2" />
                   Edit
                 </Button>
                 <Button
                   variant="destructive"
                   size="sm"
-                  onClick={() => handleDelete(question.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(question.id);
+                  }}
                 >
                   <Trash2 className="w-4 h-4" />
                 </Button>

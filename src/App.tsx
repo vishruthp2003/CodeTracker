@@ -8,6 +8,7 @@ import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Questions from "./pages/Questions";
 import QuestionForm from "./pages/QuestionForm";
+import QuestionDetail from "./pages/QuestionDetail";
 import Layout from "./components/Layout";
 import NotFound from "./pages/NotFound";
 
@@ -27,6 +28,7 @@ const App = () => (
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/questions" element={<Questions />} />
               <Route path="/questions/new" element={<QuestionForm />} />
+              <Route path="/questions/:id" element={<QuestionDetail />} />
               <Route path="/questions/edit/:id" element={<QuestionForm />} />
             </Route>
             <Route path="*" element={<NotFound />} />
