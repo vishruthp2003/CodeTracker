@@ -1,12 +1,15 @@
-import { Outlet, Link, useNavigate } from "react-router-dom";
+import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
-import { Code2, LayoutDashboard, ListChecks, LogOut, Plus } from "lucide-react";
+import { Code2, LayoutDashboard, ListChecks, LogOut, Plus, User, Moon, Sun } from "lucide-react";
 import { useEffect } from "react";
 
 const Layout = () => {
   const { user, signOut, loading } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -41,17 +44,36 @@ const Layout = () => {
             <nav className="hidden md:flex items-center gap-6">
               <Link
                 to="/dashboard"
-                className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                  location.pathname === "/dashboard"
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
                 <LayoutDashboard className="w-4 h-4" />
                 Dashboard
               </Link>
               <Link
                 to="/questions"
-                className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                  location.pathname.startsWith("/questions")
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
               >
                 <ListChecks className="w-4 h-4" />
                 Questions
+              </Link>
+              <Link
+                to="/profile"
+                className={`flex items-center gap-2 text-sm font-medium transition-colors ${
+                  location.pathname === "/profile"
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <User className="w-4 h-4" />
+                Profile
               </Link>
             </nav>
           </div>
@@ -65,6 +87,13 @@ const Layout = () => {
               <Plus className="w-4 h-4" />
               Add Question
             </Button>
+            <Button
+              onClick={toggleTheme}
+              variant="ghost"
+              size="sm"
+            >
+              {theme === "dark" ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </Button>
             <Button onClick={signOut} variant="outline" size="sm">
               <LogOut className="w-4 h-4 mr-2" />
               Logout
@@ -77,7 +106,7 @@ const Layout = () => {
         <Outlet />
       </main>
 
-      <footer className="border-t border-border bg-card py-6">
+      <footer className="border-t border-border py-6">
         <div className="container px-4 text-center text-sm text-muted-foreground">
           Made with ❤️ by Vishruth
         </div>

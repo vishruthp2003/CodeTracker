@@ -25,6 +25,7 @@ const QuestionForm = () => {
     difficulty: "Medium",
     status: "To Do",
     solution_code: "",
+    notes: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -53,6 +54,7 @@ const QuestionForm = () => {
         difficulty: data.difficulty,
         status: data.status,
         solution_code: data.solution_code || "",
+        notes: data.notes || "",
       });
     } catch (error) {
       console.error("Error fetching question:", error);
@@ -70,6 +72,8 @@ const QuestionForm = () => {
         ...formData,
         user_id: user?.id,
         solution_code: formData.solution_code || null,
+        notes: formData.notes || null,
+        last_solved_at: formData.status === "Completed" ? new Date().toISOString() : null,
       };
 
       if (isEdit) {
@@ -202,6 +206,17 @@ const QuestionForm = () => {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="notes">Notes / Approach (Optional)</Label>
+              <Textarea
+                id="notes"
+                placeholder="Explain your approach, time/space complexity, key insights..."
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                rows={4}
+              />
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="solution_code">Solution Code (Optional)</Label>
               <Textarea
                 id="solution_code"
@@ -209,7 +224,7 @@ const QuestionForm = () => {
                 value={formData.solution_code}
                 onChange={(e) => setFormData({ ...formData, solution_code: e.target.value })}
                 rows={8}
-                className="font-mono text-sm"
+                className="font-mono text-sm bg-muted/50"
               />
             </div>
 

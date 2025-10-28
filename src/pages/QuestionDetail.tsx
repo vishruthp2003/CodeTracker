@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import CodeEditor from "@/components/CodeEditor";
 import { toast } from "sonner";
-import { ArrowLeft, Edit, Code2, BookOpen, AlertCircle } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Code2, Plus, X } from "lucide-react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Question {
   id: string;
@@ -14,20 +22,41 @@ interface Question {
   description: string;
   language: string;
   topic: string;
-  difficulty: string;
-  status: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  status: "To Do" | "In Progress" | "Completed";
   solution_code: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+interface Solution {
+  id: string;
+  question_id: string;
+  language: string;
+  solution_code: string;
+  notes: string | null;
   created_at: string;
 }
 
 const QuestionDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [question, setQuestion] = useState<Question | null>(null);
+  const [solutions, setSolutions] = useState<Solution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAddingSolution, setIsAddingSolution] = useState(false);
+  const [newSolution, setNewSolution] = useState({
+    language: "",
+    solution_code: "",
+    notes: "",
+  });
 
   useEffect(() => {
-    fetchQuestion();
+    if (id) {
+      fetchQuestion();
+      fetchSolutions();
+    }
   }, [id]);
 
   const fetchQuestion = async () => {
@@ -39,7 +68,7 @@ const QuestionDetail = () => {
         .single();
 
       if (error) throw error;
-      setQuestion(data);
+      setQuestion(data as Question);
     } catch (error) {
       console.error("Error fetching question:", error);
       toast.error("Failed to load question");
@@ -49,14 +78,72 @@ const QuestionDetail = () => {
     }
   };
 
+  const fetchSolutions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("question_solutions")
+        .select("*")
+        .eq("question_id", id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setSolutions(data as Solution[]);
+    } catch (error) {
+      console.error("Error fetching solutions:", error);
+    }
+  };
+
+  const handleAddSolution = async () => {
+    if (!newSolution.language || !newSolution.solution_code) {
+      toast.error("Please fill in language and solution code");
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("question_solutions").insert({
+        question_id: id,
+        language: newSolution.language,
+        solution_code: newSolution.solution_code,
+        notes: newSolution.notes || null,
+      });
+
+      if (error) throw error;
+      toast.success("Solution added successfully!");
+      setIsAddingSolution(false);
+      setNewSolution({ language: "", solution_code: "", notes: "" });
+      fetchSolutions();
+    } catch (error) {
+      console.error("Error adding solution:", error);
+      toast.error("Failed to add solution");
+    }
+  };
+
+  const handleDeleteSolution = async (solutionId: string) => {
+    if (!confirm("Are you sure you want to delete this solution?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("question_solutions")
+        .delete()
+        .eq("id", solutionId);
+
+      if (error) throw error;
+      toast.success("Solution deleted successfully");
+      fetchSolutions();
+    } catch (error) {
+      console.error("Error deleting solution:", error);
+      toast.error("Failed to delete solution");
+    }
+  };
+
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
       case "Easy":
-        return "bg-success/20 text-success border-success/50";
+        return "bg-success text-success-foreground";
       case "Medium":
-        return "bg-warning/20 text-warning border-warning/50";
+        return "bg-warning text-warning-foreground";
       case "Hard":
-        return "bg-destructive/20 text-destructive border-destructive/50";
+        return "bg-destructive text-destructive-foreground";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -65,11 +152,11 @@ const QuestionDetail = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Completed":
-        return "bg-success/20 text-success border-success/50";
+        return "bg-success text-success-foreground";
       case "In Progress":
-        return "bg-warning/20 text-warning border-warning/50";
+        return "bg-warning text-warning-foreground";
       case "To Do":
-        return "bg-muted text-muted-foreground border-muted-foreground/50";
+        return "bg-muted text-muted-foreground";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -78,15 +165,14 @@ const QuestionDetail = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-pulse text-muted-foreground">Loading question...</div>
+        <div className="animate-pulse text-primary">Loading question...</div>
       </div>
     );
   }
 
   if (!question) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
-        <AlertCircle className="w-12 h-12 text-muted-foreground" />
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
         <p className="text-muted-foreground">Question not found</p>
         <Button onClick={() => navigate("/questions")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
@@ -97,7 +183,7 @@ const QuestionDetail = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
@@ -116,94 +202,177 @@ const QuestionDetail = () => {
         </Button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Problem Description */}
-        <Card className="lg:col-span-1 h-fit">
-          <CardHeader className="space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <h1 className="text-2xl font-bold tracking-tight">{question.title}</h1>
+      <Card>
+        <CardHeader>
+          <div className="flex items-start justify-between gap-4">
+            <div className="space-y-2 flex-1">
+              <CardTitle className="text-3xl">{question.title}</CardTitle>
+              <CardDescription className="text-base">{question.description}</CardDescription>
+            </div>
+            <div className="flex flex-col gap-2">
               <Badge className={getDifficultyColor(question.difficulty)}>
                 {question.difficulty}
-              </Badge>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="gap-1">
-                <Code2 className="w-3 h-3" />
-                {question.language}
-              </Badge>
-              <Badge variant="outline" className="gap-1">
-                <BookOpen className="w-3 h-3" />
-                {question.topic}
               </Badge>
               <Badge className={getStatusColor(question.status)}>
                 {question.status}
               </Badge>
             </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                <span className="w-1 h-5 bg-primary rounded-full" />
-                Problem Description
-              </h2>
-              <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                {question.description}
-              </p>
-            </div>
-            
-            <Separator />
-            
-            <div className="grid grid-cols-2 gap-4 text-sm">
+          </div>
+          <div className="flex gap-2 pt-2">
+            <Badge variant="outline">{question.language}</Badge>
+            <Badge variant="outline">{question.topic}</Badge>
+          </div>
+        </CardHeader>
+
+        <Separator />
+
+        <CardContent className="space-y-6 pt-6">
+          {question.notes && (
+            <>
               <div>
-                <span className="text-muted-foreground">Created</span>
-                <p className="font-medium mt-1">
-                  {new Date(question.created_at).toLocaleDateString()}
+                <h3 className="text-lg font-semibold mb-3">Notes / Approach</h3>
+                <p className="text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {question.notes}
                 </p>
               </div>
-              <div>
-                <span className="text-muted-foreground">Status</span>
-                <p className="font-medium mt-1">{question.status}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              <Separator />
+            </>
+          )}
 
-        {/* Solution Code */}
-        <Card className="lg:col-span-1 h-fit">
-          <CardHeader>
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <span className="w-1 h-5 bg-secondary rounded-full" />
-              Solution
-            </h2>
-          </CardHeader>
-          <CardContent>
-            {question.solution_code ? (
-              <div className="relative">
-                <div className="absolute top-3 right-3 text-xs text-muted-foreground font-mono">
-                  {question.language}
-                </div>
-                <pre className="bg-muted/50 rounded-lg p-4 overflow-x-auto border border-border">
-                  <code className="text-sm font-mono leading-relaxed text-foreground">
-                    {question.solution_code}
-                  </code>
-                </pre>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Code2 className="w-12 h-12 text-muted-foreground/50 mb-3" />
-                <p className="text-muted-foreground">No solution code available yet</p>
-                <Button
-                  variant="outline"
-                  className="mt-4"
-                  onClick={() => navigate(`/questions/edit/${id}`)}
-                >
-                  Add Solution
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Code2 className="w-5 h-5 text-primary" />
+                Solutions
+              </h3>
+              <Dialog open={isAddingSolution} onOpenChange={setIsAddingSolution}>
+                <DialogTrigger asChild>
+                  <Button size="sm" className="gap-2">
+                    <Plus className="w-4 h-4" />
+                    Add Solution
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Add New Solution</DialogTitle>
+                    <DialogDescription>
+                      Add a solution in a different programming language
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="solution-language">Language *</Label>
+                      <Input
+                        id="solution-language"
+                        placeholder="e.g., Python, Java, C++"
+                        value={newSolution.language}
+                        onChange={(e) =>
+                          setNewSolution({ ...newSolution, language: e.target.value })
+                        }
+                      />
+                    </div>
+                    <CodeEditor
+                      value={newSolution.solution_code}
+                      onChange={(value) =>
+                        setNewSolution({ ...newSolution, solution_code: value })
+                      }
+                      language={newSolution.language || "code"}
+                      label="Solution Code *"
+                      rows={12}
+                    />
+                    <div className="space-y-2">
+                      <Label htmlFor="solution-notes">Notes (Optional)</Label>
+                      <Input
+                        id="solution-notes"
+                        placeholder="Any additional notes about this solution..."
+                        value={newSolution.notes}
+                        onChange={(e) =>
+                          setNewSolution({ ...newSolution, notes: e.target.value })
+                        }
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsAddingSolution(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleAddSolution}>Add Solution</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Tabs defaultValue="main" className="w-full">
+              <TabsList className="w-full justify-start overflow-x-auto">
+                <TabsTrigger value="main">
+                  Main ({question.language})
+                </TabsTrigger>
+                {solutions.map((solution, index) => (
+                  <TabsTrigger key={solution.id} value={solution.id}>
+                    {solution.language} #{index + 1}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+
+              <TabsContent value="main" className="space-y-4">
+                {question.solution_code ? (
+                  <div className="relative">
+                    <SyntaxHighlighter
+                      language={question.language.toLowerCase()}
+                      style={vscDarkPlus}
+                      customStyle={{
+                        borderRadius: "0.5rem",
+                        border: "1px solid hsl(var(--border))",
+                        fontSize: "0.875rem",
+                        margin: 0,
+                      }}
+                    >
+                      {question.solution_code}
+                    </SyntaxHighlighter>
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">No solution code added yet</p>
+                )}
+              </TabsContent>
+
+              {solutions.map((solution) => (
+                <TabsContent key={solution.id} value={solution.id} className="space-y-4">
+                  <div className="flex justify-end">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeleteSolution(solution.id)}
+                      className="text-destructive hover:text-destructive"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
+                  <div className="relative">
+                    <SyntaxHighlighter
+                      language={solution.language.toLowerCase()}
+                      style={vscDarkPlus}
+                      customStyle={{
+                        borderRadius: "0.5rem",
+                        border: "1px solid hsl(var(--border))",
+                        fontSize: "0.875rem",
+                        margin: 0,
+                      }}
+                    >
+                      {solution.solution_code}
+                    </SyntaxHighlighter>
+                  </div>
+                  {solution.notes && (
+                    <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded">
+                      <strong>Notes:</strong> {solution.notes}
+                    </div>
+                  )}
+                </TabsContent>
+              ))}
+            </Tabs>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

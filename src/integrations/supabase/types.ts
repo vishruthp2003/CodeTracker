@@ -21,6 +21,8 @@ export type Database = {
           difficulty: string
           id: string
           language: string
+          last_solved_at: string | null
+          notes: string | null
           solution_code: string | null
           status: string
           title: string
@@ -34,6 +36,8 @@ export type Database = {
           difficulty: string
           id?: string
           language: string
+          last_solved_at?: string | null
+          notes?: string | null
           solution_code?: string | null
           status?: string
           title: string
@@ -47,6 +51,8 @@ export type Database = {
           difficulty?: string
           id?: string
           language?: string
+          last_solved_at?: string | null
+          notes?: string | null
           solution_code?: string | null
           status?: string
           title?: string
@@ -58,21 +64,68 @@ export type Database = {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
+          bio: string | null
           created_at: string
           id: string
+          updated_at: string
           username: string | null
         }
         Insert: {
+          avatar_url?: string | null
+          bio?: string | null
           created_at?: string
           id: string
+          updated_at?: string
           username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          username?: string | null
+        }
+        Relationships: []
+      }
+      question_solutions: {
+        Row: {
+          created_at: string
+          id: string
+          language: string
+          notes: string | null
+          question_id: string
+          solution_code: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language: string
+          notes?: string | null
+          question_id: string
+          solution_code: string
+          updated_at?: string
         }
         Update: {
           created_at?: string
           id?: string
-          username?: string | null
+          language?: string
+          notes?: string | null
+          question_id?: string
+          solution_code?: string
+          updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "question_solutions_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "coding_questions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
