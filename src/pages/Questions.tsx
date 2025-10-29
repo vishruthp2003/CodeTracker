@@ -264,61 +264,58 @@ const Questions = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="space-y-3">
           {filteredQuestions.map((question) => (
             <Card 
               key={question.id} 
-              className="flex flex-col hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 cursor-pointer group animate-fade-in"
+              className="hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 cursor-pointer group animate-fade-in"
               onClick={() => navigate(`/questions/${question.id}`)}
             >
-              <CardHeader>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <Badge className={getDifficultyColor(question.difficulty)}>
-                    {question.difficulty}
-                  </Badge>
-                  <Badge className={getStatusColor(question.status)}>
-                    {question.status}
-                  </Badge>
-                </div>
-                <CardTitle className="line-clamp-2 group-hover:text-primary transition-colors">{question.title}</CardTitle>
-                <CardDescription className="line-clamp-3">{question.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Language:</span>
-                    <Badge variant="outline">{question.language}</Badge>
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Badge className={getDifficultyColor(question.difficulty)}>
+                        {question.difficulty}
+                      </Badge>
+                      <Badge className={getStatusColor(question.status)}>
+                        {question.status}
+                      </Badge>
+                      <Badge variant="outline">{question.language}</Badge>
+                      <Badge variant="outline">{question.topic}</Badge>
+                    </div>
+                    <h3 className="text-lg font-semibold group-hover:text-primary transition-colors mb-1 truncate">
+                      {question.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {question.description}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Topic:</span>
-                    <Badge variant="outline">{question.topic}</Badge>
+                  <div className="flex gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/questions/edit/${question.id}`);
+                      }}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(question.id);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </CardContent>
-              <CardFooter className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate(`/questions/edit/${question.id}`);
-                  }}
-                >
-                  <Edit className="w-4 h-4 mr-2" />
-                  Edit
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDelete(question.id);
-                  }}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </CardFooter>
             </Card>
           ))}
         </div>

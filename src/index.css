@@ -118,9 +118,14 @@ All colors MUST be HSL.
     @apply font-mono;
   }
 
-  /* Hide Lovable badge */
-  [data-lovable-badge] {
+  /* Hide Lovable badge and edit button */
+  [data-lovable-badge],
+  [data-lovable-edit-button],
+  button[aria-label*="Edit"],
+  button[aria-label*="Lovable"] {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
   }
 }
 

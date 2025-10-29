@@ -121,6 +121,11 @@ const Dashboard = () => {
     { name: "To Do", value: stats.todo, color: "hsl(var(--muted))" },
   ].filter(item => item.value > 0);
 
+  const totalVsCompletedData = [
+    { name: "Completed", value: stats.completed, color: "hsl(var(--success))" },
+    { name: "Remaining", value: stats.total - stats.completed, color: "hsl(var(--muted))" },
+  ].filter(item => item.value > 0);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -226,8 +231,45 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-3">
         <Card className="animate-fade-in" style={{ animationDelay: '0.7s' }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Total vs Completed
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            {stats.total > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={totalVsCompletedData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}
+                    outerRadius={90}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {totalVsCompletedData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                No data to display
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
@@ -264,7 +306,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
+        <Card className="animate-fade-in" style={{ animationDelay: '0.9s' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
