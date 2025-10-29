@@ -196,7 +196,7 @@ const Profile = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           My Profile
@@ -205,7 +205,7 @@ const Profile = () => {
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Profile Card */}
-        <Card className="md:col-span-1">
+        <Card className="md:col-span-1 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <CardHeader>
             <CardTitle>Profile</CardTitle>
           </CardHeader>
@@ -287,7 +287,7 @@ const Profile = () => {
         {/* Stats Cards */}
         <div className="md:col-span-2 space-y-6">
           {/* Streak Display */}
-          <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+          <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Flame className="w-5 h-5 text-primary" />
@@ -325,7 +325,7 @@ const Profile = () => {
 
           {/* Stats Grid */}
           <div className="grid gap-4 md:grid-cols-2">
-            <Card>
+            <Card className="animate-fade-in" style={{ animationDelay: '0.3s' }}>
               <CardHeader className="pb-3">
                 <CardDescription>Total Questions</CardDescription>
               </CardHeader>
@@ -337,7 +337,7 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <CardHeader className="pb-3">
                 <CardDescription>Completed</CardDescription>
               </CardHeader>
@@ -349,7 +349,7 @@ const Profile = () => {
               </CardContent>
             </Card>
 
-            <Card className="md:col-span-2">
+            <Card className="md:col-span-2 animate-fade-in" style={{ animationDelay: '0.5s' }}>
               <CardHeader className="pb-3">
                 <CardDescription>Completion Rate</CardDescription>
               </CardHeader>
@@ -373,7 +373,7 @@ const Profile = () => {
           </div>
 
           {/* Account Actions */}
-          <Card className="border-destructive/50">
+          <Card className="border-destructive/50 animate-fade-in" style={{ animationDelay: '0.6s' }}>
             <CardHeader>
               <CardTitle className="text-destructive">Danger Zone</CardTitle>
               <CardDescription>Irreversible account actions</CardDescription>

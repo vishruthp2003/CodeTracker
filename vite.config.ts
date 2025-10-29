@@ -15,12 +15,4 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  optimizeDeps: {
-    include: ['react-syntax-highlighter'],
-  },
-  build: {
-    commonjsOptions: {
-      include: [/react-syntax-highlighter/, /node_modules/],
-    },
-  },
 }));

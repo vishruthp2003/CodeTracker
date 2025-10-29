@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import CodeEditor from "@/components/CodeEditor";
 import { toast } from "sonner";
-import { ArrowLeft, Edit, Trash2, Code2, Plus, X } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Code2, Plus, X, Clock } from "lucide-react";
 
 interface Question {
   id: string;
@@ -25,6 +25,8 @@ interface Question {
   solution_code: string | null;
   notes: string | null;
   created_at: string;
+  updated_at: string;
+  last_solved_at: string | null;
 }
 
 interface Solution {
@@ -180,8 +182,19 @@ const QuestionDetail = () => {
     );
   }
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", { 
+      year: "numeric", 
+      month: "short", 
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  };
+
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <Button
           variant="ghost"
@@ -216,9 +229,19 @@ const QuestionDetail = () => {
               </Badge>
             </div>
           </div>
-          <div className="flex gap-2 pt-2">
+          <div className="flex flex-wrap gap-2 pt-2">
             <Badge variant="outline">{question.language}</Badge>
             <Badge variant="outline">{question.topic}</Badge>
+            <Badge variant="outline" className="gap-1">
+              <Clock className="w-3 h-3" />
+              Updated: {formatDate(question.updated_at)}
+            </Badge>
+            {question.last_solved_at && (
+              <Badge variant="outline" className="gap-1">
+                <Clock className="w-3 h-3" />
+                Solved: {formatDate(question.last_solved_at)}
+              </Badge>
+            )}
           </div>
         </CardHeader>
 

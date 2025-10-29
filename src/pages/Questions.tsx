@@ -32,6 +32,8 @@ const Questions = () => {
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [languageFilter, setLanguageFilter] = useState("all");
+  const [topicFilter, setTopicFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
     if (user) {
@@ -41,7 +43,7 @@ const Questions = () => {
 
   useEffect(() => {
     filterQuestions();
-  }, [searchQuery, difficultyFilter, statusFilter, languageFilter, questions]);
+  }, [searchQuery, difficultyFilter, statusFilter, languageFilter, topicFilter, sortBy, questions]);
 
   const fetchQuestions = async () => {
     try {
@@ -83,6 +85,26 @@ const Questions = () => {
     if (languageFilter !== "all") {
       filtered = filtered.filter((q) => q.language === languageFilter);
     }
+
+    if (topicFilter !== "all") {
+      filtered = filtered.filter((q) => q.topic === topicFilter);
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "completed":
+          if (a.status === "Completed" && b.status !== "Completed") return -1;
+          if (a.status !== "Completed" && b.status === "Completed") return 1;
+          return 0;
+        default:
+          return 0;
+      }
+    });
 
     setFilteredQuestions(filtered);
   };
@@ -130,6 +152,7 @@ const Questions = () => {
   };
 
   const languages = Array.from(new Set(questions.map((q) => q.language)));
+  const topics = Array.from(new Set(questions.map((q) => q.topic)));
 
   if (loading) {
     return (
@@ -154,8 +177,8 @@ const Questions = () => {
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="relative">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="relative md:col-span-2 lg:col-span-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search questions..."
@@ -202,6 +225,31 @@ const Questions = () => {
             ))}
           </SelectContent>
         </Select>
+
+        <Select value={topicFilter} onValueChange={setTopicFilter}>
+          <SelectTrigger>
+            <SelectValue placeholder="Topic" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Topics</SelectItem>
+            {topics.map((topic) => (
+              <SelectItem key={topic} value={topic}>
+                {topic}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger>
+            <SelectValue placeholder="Sort By" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            <SelectItem value="completed">Completed First</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {filteredQuestions.length === 0 ? (
@@ -220,7 +268,7 @@ const Questions = () => {
           {filteredQuestions.map((question) => (
             <Card 
               key={question.id} 
-              className="flex flex-col hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 cursor-pointer group"
+              className="flex flex-col hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 cursor-pointer group animate-fade-in"
               onClick={() => navigate(`/questions/${question.id}`)}
             >
               <CardHeader>

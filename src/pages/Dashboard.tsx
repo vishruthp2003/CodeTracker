@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, Circle, Clock, Code2, TrendingUp } from "lucide-react";
+import { CheckCircle2, Circle, Clock, Code2, TrendingUp, Flame, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
 interface Stats {
   total: number;
@@ -16,6 +17,9 @@ interface Stats {
     Medium: number;
     Hard: number;
   };
+  streak: number;
+  weeklyCompleted: number;
+  monthlyCompleted: number;
 }
 
 const Dashboard = () => {
@@ -26,6 +30,9 @@ const Dashboard = () => {
     inProgress: 0,
     todo: 0,
     byDifficulty: { Easy: 0, Medium: 0, Hard: 0 },
+    streak: 0,
+    weeklyCompleted: 0,
+    monthlyCompleted: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -39,10 +46,49 @@ const Dashboard = () => {
     try {
       const { data, error } = await supabase
         .from("coding_questions")
-        .select("status, difficulty")
+        .select("status, difficulty, last_solved_at, updated_at")
         .eq("user_id", user?.id);
 
       if (error) throw error;
+
+      // Calculate streak
+      const sortedDates = data
+        .filter((q) => q.last_solved_at)
+        .map((q) => new Date(q.last_solved_at!))
+        .sort((a, b) => b.getTime() - a.getTime());
+
+      let streak = 0;
+      if (sortedDates.length > 0) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        let currentDate = new Date(today);
+        const uniqueDates = new Set(sortedDates.map(d => d.toDateString()));
+        
+        // Check if there's activity today or yesterday to start streak
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        
+        if (uniqueDates.has(today.toDateString()) || uniqueDates.has(yesterday.toDateString())) {
+          while (uniqueDates.has(currentDate.toDateString())) {
+            streak++;
+            currentDate.setDate(currentDate.getDate() - 1);
+          }
+        }
+      }
+
+      // Calculate weekly and monthly
+      const now = new Date();
+      const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+      const weeklyCompleted = data.filter(
+        (q) => q.status === "Completed" && q.updated_at && new Date(q.updated_at) >= weekAgo
+      ).length;
+
+      const monthlyCompleted = data.filter(
+        (q) => q.status === "Completed" && q.updated_at && new Date(q.updated_at) >= monthAgo
+      ).length;
 
       const newStats: Stats = {
         total: data.length,
@@ -54,6 +100,9 @@ const Dashboard = () => {
           Medium: data.filter((q) => q.difficulty === "Medium").length,
           Hard: data.filter((q) => q.difficulty === "Hard").length,
         },
+        streak,
+        weeklyCompleted,
+        monthlyCompleted,
       };
 
       setStats(newStats);
@@ -65,6 +114,12 @@ const Dashboard = () => {
   };
 
   const progressPercentage = stats.total > 0 ? (stats.completed / stats.total) * 100 : 0;
+
+  const chartData = [
+    { name: "Completed", value: stats.completed, color: "hsl(var(--success))" },
+    { name: "In Progress", value: stats.inProgress, color: "hsl(var(--warning))" },
+    { name: "To Do", value: stats.todo, color: "hsl(var(--muted))" },
+  ].filter(item => item.value > 0);
 
   if (loading) {
     return (
@@ -89,7 +144,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-primary/20 bg-gradient-to-br from-card to-card/50">
+        <Card className="border-primary/20 bg-gradient-to-br from-card to-card/50 animate-fade-in">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Questions</CardTitle>
             <Code2 className="h-4 w-4 text-primary" />
@@ -100,7 +155,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-success/20 bg-gradient-to-br from-card to-card/50">
+        <Card className="border-success/20 bg-gradient-to-br from-card to-card/50 animate-fade-in" style={{ animationDelay: '0.1s' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Completed</CardTitle>
             <CheckCircle2 className="h-4 w-4 text-success" />
@@ -113,7 +168,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-warning/20 bg-gradient-to-br from-card to-card/50">
+        <Card className="border-warning/20 bg-gradient-to-br from-card to-card/50 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">In Progress</CardTitle>
             <Clock className="h-4 w-4 text-warning" />
@@ -124,7 +179,7 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="border-muted bg-gradient-to-br from-card to-card/50">
+        <Card className="border-muted bg-gradient-to-br from-card to-card/50 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">To Do</CardTitle>
             <Circle className="h-4 w-4 text-muted-foreground" />
@@ -136,39 +191,113 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            Difficulty Breakdown
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-success" />
-                <span className="font-medium">Easy</span>
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="border-primary/20 bg-gradient-to-br from-card to-card/50 animate-fade-in" style={{ animationDelay: '0.4s' }}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Current Streak</CardTitle>
+            <Flame className="h-4 w-4 text-orange-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-orange-500">{stats.streak}</div>
+            <p className="text-xs text-muted-foreground mt-1">Consecutive days</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-primary/20 bg-gradient-to-br from-card to-card/50 animate-fade-in" style={{ animationDelay: '0.5s' }}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">This Week</CardTitle>
+            <Calendar className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-primary">{stats.weeklyCompleted}</div>
+            <p className="text-xs text-muted-foreground mt-1">Questions completed</p>
+          </CardContent>
+        </Card>
+
+        <Card className="border-primary/20 bg-gradient-to-br from-card to-card/50 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">This Month</CardTitle>
+            <Calendar className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-primary">{stats.monthlyCompleted}</div>
+            <p className="text-xs text-muted-foreground mt-1">Questions completed</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card className="animate-fade-in" style={{ animationDelay: '0.7s' }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Progress Overview
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="h-[300px]">
+            {stats.total > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                No data to display
               </div>
-              <span className="text-2xl font-bold text-success">{stats.byDifficulty.Easy}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-warning" />
-                <span className="font-medium">Medium</span>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="animate-fade-in" style={{ animationDelay: '0.8s' }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Difficulty Breakdown
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-success" />
+                  <span className="font-medium">Easy</span>
+                </div>
+                <span className="text-2xl font-bold text-success">{stats.byDifficulty.Easy}</span>
               </div>
-              <span className="text-2xl font-bold text-warning">{stats.byDifficulty.Medium}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-3 h-3 rounded-full bg-destructive" />
-                <span className="font-medium">Hard</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-warning" />
+                  <span className="font-medium">Medium</span>
+                </div>
+                <span className="text-2xl font-bold text-warning">{stats.byDifficulty.Medium}</span>
               </div>
-              <span className="text-2xl font-bold text-destructive">{stats.byDifficulty.Hard}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-destructive" />
+                  <span className="font-medium">Hard</span>
+                </div>
+                <span className="text-2xl font-bold text-destructive">{stats.byDifficulty.Hard}</span>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
