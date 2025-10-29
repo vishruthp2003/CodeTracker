@@ -13,8 +13,6 @@ import { Label } from "@/components/ui/label";
 import CodeEditor from "@/components/CodeEditor";
 import { toast } from "sonner";
 import { ArrowLeft, Edit, Trash2, Code2, Plus, X } from "lucide-react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Question {
   id: string;
@@ -317,18 +315,9 @@ const QuestionDetail = () => {
               <TabsContent value="main" className="space-y-4">
                 {question.solution_code ? (
                   <div className="relative">
-                    <SyntaxHighlighter
-                      language={question.language.toLowerCase()}
-                      style={vscDarkPlus}
-                      customStyle={{
-                        borderRadius: "0.5rem",
-                        border: "1px solid hsl(var(--border))",
-                        fontSize: "0.875rem",
-                        margin: 0,
-                      }}
-                    >
-                      {question.solution_code}
-                    </SyntaxHighlighter>
+                    <pre className="rounded-md border border-border bg-muted/40 p-4 text-sm overflow-x-auto">
+                      <code>{question.solution_code}</code>
+                    </pre>
                   </div>
                 ) : (
                   <p className="text-muted-foreground text-sm">No solution code added yet</p>
@@ -349,18 +338,9 @@ const QuestionDetail = () => {
                     </Button>
                   </div>
                   <div className="relative">
-                    <SyntaxHighlighter
-                      language={solution.language.toLowerCase()}
-                      style={vscDarkPlus}
-                      customStyle={{
-                        borderRadius: "0.5rem",
-                        border: "1px solid hsl(var(--border))",
-                        fontSize: "0.875rem",
-                        margin: 0,
-                      }}
-                    >
-                      {solution.solution_code}
-                    </SyntaxHighlighter>
+                    <pre className="rounded-md border border-border bg-muted/40 p-4 text-sm overflow-x-auto">
+                      <code>{solution.solution_code}</code>
+                    </pre>
                   </div>
                   {solution.notes && (
                     <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded">
