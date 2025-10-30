@@ -264,59 +264,53 @@ const Questions = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2">
           {filteredQuestions.map((question) => (
-            <Card 
-              key={question.id} 
-              className="hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 cursor-pointer group animate-fade-in"
+            <div
+              key={question.id}
+              className="flex items-center gap-4 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-all cursor-pointer group animate-fade-in"
               onClick={() => navigate(`/questions/${question.id}`)}
             >
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Badge className={getDifficultyColor(question.difficulty)}>
-                        {question.difficulty}
-                      </Badge>
-                      <Badge className={getStatusColor(question.status)}>
-                        {question.status}
-                      </Badge>
-                      <Badge variant="outline">{question.language}</Badge>
-                      <Badge variant="outline">{question.topic}</Badge>
-                    </div>
-                    <h3 className="text-lg font-semibold group-hover:text-primary transition-colors mb-1 truncate">
-                      {question.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {question.description}
-                    </p>
-                  </div>
-                  <div className="flex gap-2 shrink-0">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/questions/edit/${question.id}`);
-                      }}
-                    >
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(question.id);
-                      }}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-base font-medium group-hover:text-primary transition-colors truncate">
+                    {question.title}
+                  </h3>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Badge className={getDifficultyColor(question.difficulty)} variant="secondary">
+                      {question.difficulty}
+                    </Badge>
+                    <Badge className={getStatusColor(question.status)} variant="secondary">
+                      {question.status}
+                    </Badge>
+                    <Badge variant="outline">{question.language}</Badge>
+                    <Badge variant="outline">{question.topic}</Badge>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/questions/edit/${question.id}`);
+                  }}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(question.id);
+                  }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           ))}
         </div>
       )}

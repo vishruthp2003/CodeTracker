@@ -289,36 +289,38 @@ const Profile = () => {
           {/* Streak Display */}
           <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Flame className="w-5 h-5 text-primary" />
-                Current Streak
+              <CardTitle className="flex items-center justify-between text-sm">
+                <span>{stats.completed} submissions in the past one year</span>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>Total active days: {stats.currentStreak > 0 ? stats.currentStreak : stats.longestStreak}</span>
+                  <span>Max streak: {stats.longestStreak}</span>
+                  <span>Current: {stats.currentStreak}</span>
+                </div>
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <div className="text-5xl font-bold text-primary">{stats.currentStreak}</div>
-                  <p className="text-sm text-muted-foreground">days</p>
+              <div className="space-y-2">
+                <div className="grid grid-cols-53 gap-1">
+                  {Array.from({ length: 371 }).map((_, i) => {
+                    const date = new Date();
+                    date.setDate(date.getDate() - (370 - i));
+                    const isActive = Math.random() > 0.9; // Replace with actual activity data
+                    return (
+                      <div
+                        key={i}
+                        className={`w-2 h-2 rounded-sm ${
+                          isActive ? "bg-success" : "bg-muted"
+                        } transition-colors`}
+                        title={date.toDateString()}
+                      />
+                    );
+                  })}
                 </div>
-                <div className="text-right space-y-1">
-                  <div className="text-2xl font-semibold text-secondary">
-                    {stats.longestStreak}
-                  </div>
-                  <p className="text-xs text-muted-foreground">Longest Streak</p>
+                <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                  {["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"].map((month) => (
+                    <span key={month}>{month}</span>
+                  ))}
                 </div>
-              </div>
-              <div className="mt-4 grid grid-cols-7 gap-1">
-                {Array.from({ length: 7 }).map((_, i) => {
-                  const isActive = i < stats.currentStreak;
-                  return (
-                    <div
-                      key={i}
-                      className={`h-8 rounded ${
-                        isActive ? "bg-primary" : "bg-muted"
-                      } transition-colors`}
-                    />
-                  );
-                })}
               </div>
             </CardContent>
           </Card>

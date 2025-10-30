@@ -231,41 +231,63 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2">
         <Card className="animate-fade-in" style={{ animationDelay: '0.7s' }}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              Total vs Completed
+              Progress Overview
             </CardTitle>
           </CardHeader>
-          <CardContent className="h-[300px]">
-            {stats.total > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={totalVsCompletedData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    outerRadius={90}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {totalVsCompletedData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                No data to display
+          <CardContent>
+            <div className="flex items-center gap-8">
+              <div className="relative flex-shrink-0">
+                <ResponsiveContainer width={200} height={200}>
+                  <PieChart>
+                    <Pie
+                      data={[
+                        { name: "Easy", value: stats.byDifficulty.Easy, color: "hsl(var(--success))" },
+                        { name: "Medium", value: stats.byDifficulty.Medium, color: "hsl(var(--warning))" },
+                        { name: "Hard", value: stats.byDifficulty.Hard, color: "hsl(var(--destructive))" },
+                      ]}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      dataKey="value"
+                      strokeWidth={0}
+                    >
+                      {[
+                        { name: "Easy", value: stats.byDifficulty.Easy, color: "hsl(var(--success))" },
+                        { name: "Medium", value: stats.byDifficulty.Medium, color: "hsl(var(--warning))" },
+                        { name: "Hard", value: stats.byDifficulty.Hard, color: "hsl(var(--destructive))" },
+                      ].map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-4xl font-bold">{stats.completed}</div>
+                  <div className="text-2xl text-muted-foreground">/{stats.total}</div>
+                  <div className="text-sm text-muted-foreground">Solved</div>
+                </div>
               </div>
-            )}
+              <div className="space-y-4 flex-1">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-success/10">
+                  <span className="font-medium text-success">Easy</span>
+                  <span className="text-xl font-bold text-success">{stats.byDifficulty.Easy}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-warning/10">
+                  <span className="font-medium text-warning">Med.</span>
+                  <span className="text-xl font-bold text-warning">{stats.byDifficulty.Medium}</span>
+                </div>
+                <div className="flex items-center justify-between p-3 rounded-lg bg-destructive/10">
+                  <span className="font-medium text-destructive">Hard</span>
+                  <span className="text-xl font-bold text-destructive">{stats.byDifficulty.Hard}</span>
+                </div>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -273,7 +295,7 @@ const Dashboard = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-primary" />
-              Progress Overview
+              Status Breakdown
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[300px]">
@@ -303,40 +325,6 @@ const Dashboard = () => {
                 No data to display
               </div>
             )}
-          </CardContent>
-        </Card>
-
-        <Card className="animate-fade-in" style={{ animationDelay: '0.9s' }}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              Difficulty Breakdown
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-success" />
-                  <span className="font-medium">Easy</span>
-                </div>
-                <span className="text-2xl font-bold text-success">{stats.byDifficulty.Easy}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-warning" />
-                  <span className="font-medium">Medium</span>
-                </div>
-                <span className="text-2xl font-bold text-warning">{stats.byDifficulty.Medium}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 rounded-full bg-destructive" />
-                  <span className="font-medium">Hard</span>
-                </div>
-                <span className="text-2xl font-bold text-destructive">{stats.byDifficulty.Hard}</span>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
