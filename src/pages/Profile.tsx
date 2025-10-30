@@ -44,6 +44,8 @@ const Profile = () => {
     currentStreak: 0,
     longestStreak: 0,
   });
+  const [yearDays, setYearDays] = useState<Date[]>([]);
+  const [activityMap, setActivityMap] = useState<Record<string, number>>({});
 
   useEffect(() => {
     if (user) {
@@ -78,7 +80,7 @@ const Profile = () => {
     try {
       const { data: questions, error } = await supabase
         .from("coding_questions")
-        .select("status, last_solved_at")
+        .select("status, last_solved_at, updated_at")
         .eq("user_id", user?.id);
 
       if (error) throw error;
@@ -87,45 +89,78 @@ const Profile = () => {
       const completed = questions?.filter((q) => q.status === "Completed").length || 0;
       const completionRate = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-      // Calculate streaks
-      const solvedDates = questions
-        ?.filter((q) => q.last_solved_at)
-        .map((q) => new Date(q.last_solved_at!))
+      // Prepare activity map for the past year aligned by weeks (Sun-Sat)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const startOfRange = new Date(today);
+      startOfRange.setDate(startOfRange.getDate() - 364);
+      // Align start to the previous Sunday
+      while (startOfRange.getDay() !== 0) {
+        startOfRange.setDate(startOfRange.getDate() - 1);
+      }
+
+      const toKey = (d: Date) => d.toISOString().slice(0, 10);
+
+      const activity: Record<string, number> = {};
+      questions?.forEach((q) => {
+        // Use last_solved_at if present; otherwise, if completed, fallback to updated_at
+        const dateSource = q.last_solved_at
+          ? new Date(q.last_solved_at)
+          : q.status === "Completed" && q.updated_at
+          ? new Date(q.updated_at)
+          : null;
+        if (!dateSource) return;
+        dateSource.setHours(0, 0, 0, 0);
+        if (dateSource >= startOfRange && dateSource <= today) {
+          const key = toKey(dateSource);
+          activity[key] = (activity[key] || 0) + 1;
+        }
+      });
+
+      // Generate the 53 weeks x 7 days range
+      const totalDays = 53 * 7;
+      const days: Date[] = [];
+      for (let i = 0; i < totalDays; i++) {
+        const d = new Date(startOfRange);
+        d.setDate(startOfRange.getDate() + i);
+        days.push(d);
+      }
+
+      setActivityMap(activity);
+      setYearDays(days);
+
+      // Calculate streaks from activity
+      const activeDates = Object.keys(activity)
+        .map((k) => new Date(k))
         .sort((a, b) => b.getTime() - a.getTime());
 
       let currentStreak = 0;
       let longestStreak = 0;
       let tempStreak = 0;
 
-      if (solvedDates && solvedDates.length > 0) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const uniqueDates = Array.from(
-          new Set(solvedDates.map((d) => d.toDateString()))
-        ).map((d) => new Date(d));
-
+      if (activeDates.length > 0) {
+        // Current streak: count back from today
+        const uniqueDates = Array.from(new Set(activeDates.map((d) => d.toDateString()))).map(
+          (d) => new Date(d)
+        );
+        const ref = new Date(today);
         for (let i = 0; i < uniqueDates.length; i++) {
-          const currentDate = uniqueDates[i];
-          const expectedDate = new Date(today);
-          expectedDate.setDate(today.getDate() - i);
-          expectedDate.setHours(0, 0, 0, 0);
-
-          if (currentDate.toDateString() === expectedDate.toDateString()) {
+          const expected = new Date(ref);
+          expected.setDate(ref.getDate() - i);
+          if (uniqueDates[i].toDateString() === expected.toDateString()) {
             currentStreak++;
-            tempStreak++;
           } else {
             break;
           }
         }
 
-        // Calculate longest streak
+        // Longest streak: consecutive days within uniqueDates
         tempStreak = 1;
         for (let i = 1; i < uniqueDates.length; i++) {
-          const diff = Math.abs(
+          const diffDays = Math.round(
             (uniqueDates[i - 1].getTime() - uniqueDates[i].getTime()) / (1000 * 60 * 60 * 24)
           );
-          if (diff <= 1) {
+          if (diffDays === 1) {
             tempStreak++;
             longestStreak = Math.max(longestStreak, tempStreak);
           } else {
@@ -290,7 +325,7 @@ const Profile = () => {
           <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20 animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-sm">
-                <span>{stats.completed} submissions in the past one year</span>
+                <span>{Object.keys(activityMap).length} submissions in the past one year</span>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span>Total active days: {stats.currentStreak > 0 ? stats.currentStreak : stats.longestStreak}</span>
                   <span>Max streak: {stats.longestStreak}</span>
@@ -302,17 +337,14 @@ const Profile = () => {
               <div className="space-y-3">
                 <div className="overflow-x-auto pb-2">
                   <div className="inline-grid grid-flow-col auto-cols-max gap-1" style={{ gridTemplateRows: 'repeat(7, minmax(0, 1fr))' }}>
-                    {/* Generate 371 days (53 weeks * 7 days) */}
-                    {Array.from({ length: 371 }).map((_, index) => {
-                      const date = new Date();
-                      date.setDate(date.getDate() - (370 - index));
-                      const isActive = Math.random() > 0.9; // Replace with actual activity data
+                    {yearDays.map((date, index) => {
+                      const key = date.toISOString().slice(0, 10);
+                      const count = activityMap[key] || 0;
+                      const cls = count > 0 ? 'bg-success' : 'bg-muted';
                       return (
                         <div
                           key={index}
-                          className={`w-2.5 h-2.5 rounded-sm ${
-                            isActive ? "bg-success" : "bg-muted"
-                          } transition-colors`}
+                          className={`w-2.5 h-2.5 rounded-sm ${cls} transition-colors`}
                           title={date.toDateString()}
                         />
                       );
