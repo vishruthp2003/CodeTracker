@@ -299,24 +299,33 @@ const Profile = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div className="grid grid-cols-53 gap-1">
-                  {Array.from({ length: 371 }).map((_, i) => {
-                    const date = new Date();
-                    date.setDate(date.getDate() - (370 - i));
-                    const isActive = Math.random() > 0.9; // Replace with actual activity data
-                    return (
-                      <div
-                        key={i}
-                        className={`w-2 h-2 rounded-sm ${
-                          isActive ? "bg-success" : "bg-muted"
-                        } transition-colors`}
-                        title={date.toDateString()}
-                      />
-                    );
-                  })}
+              <div className="space-y-3">
+                <div className="overflow-x-auto">
+                  <div className="inline-flex flex-col gap-1">
+                    {/* Generate 7 rows for days of the week */}
+                    {Array.from({ length: 7 }).map((_, dayIndex) => (
+                      <div key={dayIndex} className="flex gap-1">
+                        {/* Generate 53 weeks */}
+                        {Array.from({ length: 53 }).map((_, weekIndex) => {
+                          const dayOffset = weekIndex * 7 + dayIndex;
+                          const date = new Date();
+                          date.setDate(date.getDate() - (370 - dayOffset));
+                          const isActive = Math.random() > 0.9; // Replace with actual activity data
+                          return (
+                            <div
+                              key={weekIndex}
+                              className={`w-2.5 h-2.5 rounded-sm ${
+                                isActive ? "bg-success" : "bg-muted"
+                              } transition-colors`}
+                              title={date.toDateString()}
+                            />
+                          );
+                        })}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex justify-between text-xs text-muted-foreground mt-2">
+                <div className="flex gap-6 text-xs text-muted-foreground pl-1">
                   {["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"].map((month) => (
                     <span key={month}>{month}</span>
                   ))}
