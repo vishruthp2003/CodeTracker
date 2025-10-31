@@ -118,26 +118,39 @@ All colors MUST be HSL.
     @apply font-mono;
   }
 
-  /* Hide Lovable badge and edit button */
+  /* Hide Lovable badge and edit button (robust) */
   [data-lovable-badge],
   [data-lovable-edit-button],
-  button[aria-label*="Edit"],
-  button[aria-label*="Lovable"],
-  a[href*="lovable"],
-  div[class*="lovable"],
-  iframe[title*="Lovable"],
+  [aria-label*="lovable" i],
+  [aria-label*="edit in lovable" i],
+  [title*="lovable" i],
+  a[href*="lovable.app" i],
+  a[href*="/edit" i][href*="lovable" i],
+  button[aria-label*="Edit" i],
+  button[aria-label*="Lovable" i],
+  div[class*="lovable" i],
+  iframe[title*="Lovable" i],
   #lovable-badge,
   .lovable-badge,
-  [id*="lovable-edit"],
-  [class*="lovable-edit"] {
+  [id*="lovable" i],
+  [id*="lovable-edit" i],
+  [class*="lovable-edit" i],
+  [class*="lovable-badge" i],
+  [data-testid*="lovable" i],
+  [data-test*="lovable" i],
+  [data-qa*="lovable" i],
+  [data-component*="lovable" i],
+  :where(a,button,div,span)[aria-label*="lovable" i] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
     pointer-events: none !important;
     position: absolute !important;
+    inset: 0 !important;
     width: 0 !important;
     height: 0 !important;
     overflow: hidden !important;
+    z-index: -1 !important;
   }
 }
 
