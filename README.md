@@ -1,73 +1,86 @@
-# Welcome to your Lovable project
+# CodeTracker 🚀
 
-## Project info
+CodeTracker is a comprehensive platform designed to help developers organize their coding practice, track their problem-solving journey, and visualize their progress over time. Whether you're preparing for technical interviews or improving your coding skills, CodeTracker provides all the tools you need to stay organized and motivated. A modern, full-stack web application for tracking and managing coding problems, solutions, and progress. Built with React, TypeScript, and Lovable Cloud (Supabase backend).
 
-**URL**: https://lovable.dev/projects/1a6d701e-d7d4-4762-af29-312cec32bf8e
+## ✨ Features
 
-## How can I edit this code?
+### 🔐 Authentication
+- Secure user registration and login
+- Email-based authentication
+- Password visibility toggle
+- Auto-confirm email signups
+- Protected routes and data
 
-There are several ways of editing your application.
+### 📊 Dashboard
+- **Real-time Statistics**: Track total questions, completed, in-progress, and to-do items
+- **Visual Analytics**: Interactive pie charts for difficulty and status breakdowns
+- **Streak Tracking**: Monitor current and longest solving streaks
+- **Weekly & Monthly Insights**: View completion trends over time
+- **Quick Navigation**: Easy access to all questions from the dashboard
 
-**Use Lovable**
+### 📝 Question Management
+- **CRUD Operations**: Create, read, update, and delete coding questions
+- **Rich Details**: Store title, description, language, topic, difficulty, and status
+- **Code Solutions**: Save solution code with syntax highlighting
+- **Notes & Approaches**: Document your problem-solving strategies
+- **Advanced Filtering**: Filter by difficulty, status, language, and topic
+- **Smart Sorting**: Sort by date, title, difficulty, or status
+- **Search Functionality**: Quickly find questions by title or description
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1a6d701e-d7d4-4762-af29-312cec32bf8e) and start prompting.
+### 🎯 Question Details
+- **Comprehensive View**: See all question information in one place
+- **Multiple Solutions**: Track different solution approaches for the same problem
+- **Solution Management**: Add, view, and delete alternative solutions
+- **Code Display**: Syntax-highlighted code viewer
+- **Timestamps**: Track creation and last solved dates
+- **Easy Navigation**: Quick access to edit mode
 
-Changes made via Lovable will be committed automatically to this repo.
+### 👤 Profile Management
+- **User Information**: Update username, avatar, and bio
+- **Activity Calendar**: GitHub-style contribution graph showing your coding activity
+- **Year-at-a-Glance**: Visual representation of your entire year's progress
+- **Detailed Statistics**:
+  - Total questions solved
+  - Completion rate
+  - Current streak
+  - Longest streak
+- **Account Management**: Delete account option with confirmation
 
-**Use your preferred IDE**
+### 🎨 User Experience
+- **Dark/Light Theme**: Toggle between themes with persistent preference
+- **Responsive Design**: Optimized for desktop, tablet, and mobile devices
+- **Modern UI**: Built with shadcn/ui components and Radix UI primitives
+- **Smooth Animations**: Engaging transitions and loading states
+- **Toast Notifications**: Real-time feedback for user actions
+- **Loading States**: Clear indicators during data operations
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🔧 Additional Features
+- **Code Editor**: Integrated code editor for writing and viewing solutions
+- **Data Persistence**: All data stored securely in the backend
+- **Real-time Updates**: Instant synchronization across all views
+- **Error Handling**: Comprehensive error messages and fallbacks
+- **404 Page**: Custom not found page for invalid routes
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Tech Stack
 
-Follow these steps:
+### Frontend
+- **React 18** - UI library
+- **TypeScript** - Type-safe JavaScript
+- **Vite** - Fast build tool and dev server
+- **React Router v6** - Client-side routing
+- **TailwindCSS** - Utility-first CSS framework
+- **shadcn/ui** - High-quality React components
+- **Radix UI** - Accessible component primitives
+- **Lucide React** - Beautiful icon library
+- **Recharts** - Composable charting library
+- **React Hook Form** - Form state management
+- **TanStack Query** - Data fetching and caching
+- **Sonner** - Toast notifications
+- **date-fns** - Date utility library
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/1a6d701e-d7d4-4762-af29-312cec32bf8e) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Backend (Lovable Cloud)
+- **Authentication** - Secure user management
+- **PostgreSQL Database** - Relational data storage
+- **Row Level Security (RLS)** - Data access policies
+- **Real-time Subscriptions** - Live data updates
+- **Storage** - File and asset management
