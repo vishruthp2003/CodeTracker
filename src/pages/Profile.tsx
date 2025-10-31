@@ -336,25 +336,41 @@ const Profile = () => {
             <CardContent>
               <div className="space-y-3">
                 <div className="overflow-x-auto pb-2">
-                  <div className="inline-grid grid-flow-col auto-cols-max gap-1" style={{ gridTemplateRows: 'repeat(7, minmax(0, 1fr))' }}>
-                    {yearDays.map((date, index) => {
-                      const key = date.toISOString().slice(0, 10);
-                      const count = activityMap[key] || 0;
-                      const cls = count > 0 ? 'bg-success' : 'bg-muted';
-                      return (
-                        <div
-                          key={index}
-                          className={`w-2.5 h-2.5 rounded-sm ${cls} transition-colors`}
-                          title={date.toDateString()}
-                        />
-                      );
-                    })}
+                  <div className="inline-flex flex-col gap-2">
+                    {/* Month labels - scroll together with the grid */}
+                    <div className="inline-grid grid-flow-col auto-cols-max gap-1">
+                      {Array.from({ length: Math.ceil(yearDays.length / 7) }).map((_, weekIdx) => {
+                        const weekStart = yearDays[weekIdx * 7];
+                        const prevWeekStart = weekIdx > 0 ? yearDays[(weekIdx - 1) * 7] : undefined;
+                        const showLabel = !prevWeekStart || (weekStart && prevWeekStart && weekStart.getMonth() !== prevWeekStart.getMonth());
+                        return (
+                          <div
+                            key={weekIdx}
+                            className="w-2.5 h-3 text-[10px] leading-3 text-muted-foreground text-center"
+                            title={weekStart ? weekStart.toDateString() : undefined}
+                          >
+                            {showLabel && weekStart ? weekStart.toLocaleString(undefined, { month: 'short' }) : ''}
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Contribution grid */}
+                    <div className="inline-grid grid-flow-col auto-cols-max gap-1" style={{ gridTemplateRows: 'repeat(7, minmax(0, 1fr))' }}>
+                      {yearDays.map((date, index) => {
+                        const key = date.toISOString().slice(0, 10);
+                        const count = activityMap[key] || 0;
+                        const cls = count > 0 ? 'bg-success' : 'bg-muted';
+                        return (
+                          <div
+                            key={index}
+                            className={`w-2.5 h-2.5 rounded-sm ${cls} transition-colors`}
+                            title={date.toDateString()}
+                          />
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  {["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"].map((month) => (
-                    <span key={month}>{month}</span>
-                  ))}
                 </div>
               </div>
             </CardContent>
