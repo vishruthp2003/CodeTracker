@@ -122,10 +122,22 @@ All colors MUST be HSL.
   [data-lovable-badge],
   [data-lovable-edit-button],
   button[aria-label*="Edit"],
-  button[aria-label*="Lovable"] {
+  button[aria-label*="Lovable"],
+  a[href*="lovable"],
+  div[class*="lovable"],
+  iframe[title*="Lovable"],
+  #lovable-badge,
+  .lovable-badge,
+  [id*="lovable-edit"],
+  [class*="lovable-edit"] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
+    pointer-events: none !important;
+    position: absolute !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
   }
 }
 
